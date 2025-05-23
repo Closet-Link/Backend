@@ -11,6 +11,7 @@ describe('AuthController', () => {
   beforeEach(async () => {
     const mockAuthServiceValue = {
       validateGoogleToken: jest.fn(),
+      validateGoogleTokenWithUserInfo: jest.fn(),
     };
 
     const moduleFixture: TestingModule = await Test.createTestingModule({

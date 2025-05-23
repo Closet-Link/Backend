@@ -13,18 +13,22 @@ export class AuthController {
   /**
    * Google 소셜 로그인을 처리합니다.
    * @param body Google 로그인 요청 정보
-   * @returns JWT 액세스 토큰
+   * @returns JWT 액세스 토큰과 사용자 정보
    */
   @Post('google')
   async authenticateWithGoogle(
     @Body() body: GoogleLoginDto,
   ): Promise<AuthResponseDto> {
-    const token = await this.authService.validateGoogleToken(
-      body.idToken,
-      body.platform,
-    );
+    const { accessToken, userInfo } = 
+      await this.authService.validateGoogleTokenWithUserInfo(
+        body.idToken,
+        body.platform,
+      );
 
-    return { access_token: token };
+    return { 
+      access_token: accessToken,
+      user: userInfo,
+    };
   }
 
   /**

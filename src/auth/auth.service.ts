@@ -4,6 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { OAuth2Client } from 'google-auth-library';
 import { EnvironmentVariables } from '../config/env.config';
 import { UserPayload } from './models/user-payload.interface';
+import { UserInfoDto } from './models/user-info.dto';
 
 /**
  * 인증 관련 비즈니스 로직을 처리하는 서비스
@@ -38,6 +39,38 @@ export class AuthService {
         sub: payload.sub,
         name: payload.name,
       });
+    } catch {
+      throw new UnauthorizedException('유효하지 않은 Google 토큰입니다.');
+    }
+  }
+
+  /**
+   * Google ID 토큰을 검증하고 JWT 토큰과 사용자 정보를 반환합니다.
+   * @param idToken Google ID 토큰
+   * @param platform 플랫폼 타입 (iOS 또는 Android)
+   * @returns JWT 액세스 토큰과 사용자 정보
+   */
+  async validateGoogleTokenWithUserInfo(
+    idToken: string,
+    platform: 'ios' | 'android',
+  ): Promise<{ accessToken: string; userInfo: UserInfoDto }> {
+    try {
+      const clientId = this.getGoogleClientId(platform);
+      const payload = await this.verifyGoogleToken(idToken, clientId);
+
+      const accessToken = this.createJwtToken({
+        email: payload.email,
+        sub: payload.sub,
+        name: payload.name,
+      });
+
+      const userInfo: UserInfoDto = {
+        email: payload.email,
+        name: payload.name,
+        nickname: payload.name, // 구글에서는 닉네임을 별도로 제공하지 않으므로 이름을 사용
+      };
+
+      return { accessToken, userInfo };
     } catch {
       throw new UnauthorizedException('유효하지 않은 Google 토큰입니다.');
     }
