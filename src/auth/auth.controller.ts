@@ -21,9 +21,9 @@ export class AuthController {
   ): Promise<AuthResponseDto> {
     const { accessToken, userInfo } = 
       await this.authService.validateGoogleTokenWithUserInfo(
-        body.idToken,
-        body.platform,
-      );
+      body.idToken,
+      body.platform,
+    );
 
     return { 
       access_token: accessToken,
